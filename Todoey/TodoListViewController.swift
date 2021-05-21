@@ -31,7 +31,12 @@ class TodoListViewController: UITableViewController {
             guard let strongSelf = self else {
                 return
             }
-            strongSelf.itemArray.append(textField.text ?? "")
+            guard let text = textField.text, !text.isEmpty else {
+                print("No item added!")
+                return
+            }
+
+            strongSelf.itemArray.append(text)
             strongSelf.tableView.reloadData()
         }
         alert.addTextField { alertTextFieled in
