@@ -10,17 +10,26 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     // MARK: - IBOutlets & Properties
-    private var itemArray = ["Find Mike", "Buy Eggos", "Destory Demogorgon"]
+    private var itemsArray = [String]()
     private let reuseIdentifier = "ToDoItemCell"
     private let rowHeight: CGFloat = 50.0
+    
+    // MARK: - User Defaults
+    private let defaults = UserDefaults.standard
+    private let kTodoItemListArray = "TodoItemListArray"
     
     // MARK: - ViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        restoreItemsArray()
     }
 
     // MARK: - Private:
+    private func restoreItemsArray() {
+        if let items = defaults.array(forKey: kTodoItemListArray) as? [String] {
+            itemsArray = items
+        }
+    }
     
     // MARK: - Private: IBActions
     @IBAction
@@ -36,7 +45,8 @@ class TodoListViewController: UITableViewController {
                 return
             }
 
-            strongSelf.itemArray.append(text)
+            strongSelf.itemsArray.append(text)
+            strongSelf.saveItem(items: strongSelf.itemsArray)
             strongSelf.tableView.reloadData()
         }
         alert.addTextField { alertTextFieled in
@@ -45,6 +55,10 @@ class TodoListViewController: UITableViewController {
         }
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
+    }
+    
+    private func saveItem(items: [String]) {
+        defaults.set(items, forKey: kTodoItemListArray)
     }
 }
 
@@ -55,12 +69,12 @@ extension TodoListViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        itemArray.count
+        itemsArray.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath)
-        cell.textLabel?.text = itemArray[indexPath.row]
+        cell.textLabel?.text = itemsArray[indexPath.row]
         return cell
     }
     
@@ -75,6 +89,5 @@ extension TodoListViewController {
             tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
         }
         tableView.deselectRow(at: indexPath, animated: true)
-        
     }
 }
