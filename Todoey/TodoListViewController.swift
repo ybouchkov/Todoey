@@ -10,7 +10,7 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     // MARK: - IBOutlets & Properties
-    private let itemArray = ["Find Mike", "Buy Eggos", "Destory Demogorgon"]
+    private var itemArray = ["Find Mike", "Buy Eggos", "Destory Demogorgon"]
     private let reuseIdentifier = "ToDoItemCell"
     private let rowHeight: CGFloat = 50.0
     
@@ -22,6 +22,25 @@ class TodoListViewController: UITableViewController {
 
     // MARK: - Private:
     
+    // MARK: - Private: IBActions
+    @IBAction
+    private func addButtonPressed(_ sender: UIBarButtonItem) {
+        var textField = UITextField.init()
+        let alert = UIAlertController(title: "Add new Todoey Item", message: "", preferredStyle: .alert)
+        let action = UIAlertAction(title: "Add Item", style: .default) { [weak self] action in
+            guard let strongSelf = self else {
+                return
+            }
+            strongSelf.itemArray.append(textField.text ?? "")
+            strongSelf.tableView.reloadData()
+        }
+        alert.addTextField { alertTextFieled in
+            alertTextFieled.placeholder = "Create new item"
+            textField = alertTextFieled
+        }
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
+    }
 }
 
 // MARK: - TableView Methods
