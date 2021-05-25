@@ -10,7 +10,7 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     // MARK: - IBOutlets & Properties
-    private var itemsArray = [String]()
+    private var itemsArray = [Item]()
     private let reuseIdentifier = "ToDoItemCell"
     private let rowHeight: CGFloat = 50.0
     
@@ -21,13 +21,23 @@ class TodoListViewController: UITableViewController {
     // MARK: - ViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        restoreItemsArray()
+//        restoreItemsArray()
+        produceDefaultItems()
     }
 
     // MARK: - Private:
+    private func produceDefaultItems() {
+        itemsArray = [
+            Item(title: "Find Mike"),
+            Item(title: "Have a nice week!"),
+            Item(title: "Junk"),
+            Item(title: "Food")
+        ]
+    }
+    
     private func restoreItemsArray() {
         if let items = defaults.array(forKey: kTodoItemListArray) as? [String] {
-            itemsArray = items
+//            itemsArray = items
         }
     }
     
@@ -44,9 +54,9 @@ class TodoListViewController: UITableViewController {
                 print("No item added!")
                 return
             }
-
-            strongSelf.itemsArray.append(text)
-            strongSelf.saveItem(items: strongSelf.itemsArray)
+            let newItem = Item(title: text)
+            strongSelf.itemsArray.append(newItem)
+//            strongSelf.saveItem(items: strongSelf.itemsArray)
             strongSelf.tableView.reloadData()
         }
         alert.addTextField { alertTextFieled in
@@ -63,18 +73,18 @@ class TodoListViewController: UITableViewController {
 }
 
 // MARK: - TableView Methods
-extension TodoListViewController {
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        1
-    }
-    
+extension TodoListViewController {    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         itemsArray.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath)
-        cell.textLabel?.text = itemsArray[indexPath.row]
+        
+        let item = itemsArray[indexPath.row]
+        cell.textLabel?.text = item.title
+        
+        cell.accessoryType = item.done ? .checkmark : .none
         return cell
     }
     
@@ -83,11 +93,9 @@ extension TodoListViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        } else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+
+        itemsArray[indexPath.row].done = !itemsArray[indexPath.row].done
+        tableView.reloadData()
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
