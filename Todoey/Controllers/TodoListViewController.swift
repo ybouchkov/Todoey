@@ -16,13 +16,14 @@ class TodoListViewController: UITableViewController {
     
     // MARK: - User Defaults
     private let defaults = UserDefaults.standard
-    private let kTodoItemListArray = "TodoItemListArray"
+    private let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    private let kTodoItemListArray = "TodoItemListArray_v1"
     
     // MARK: - ViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        restoreItemsArray()
-//        produceDefaultItems()
+//        restoreItemsArray()
+//        produceDefaultItems() // test case 
     }
 
     // MARK: - Private:
@@ -56,8 +57,7 @@ class TodoListViewController: UITableViewController {
             }
             let newItem = Item(title: text)
             strongSelf.itemsArray.append(newItem)
-            strongSelf.saveItem(items: strongSelf.itemsArray)
-            strongSelf.tableView.reloadData()
+            strongSelf.saveItems(items: strongSelf.itemsArray)
         }
         alert.addTextField { alertTextFieled in
             alertTextFieled.placeholder = "Create new item"
@@ -67,8 +67,15 @@ class TodoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    private func saveItem(items: [Item]) {
-        defaults.set(items, forKey: kTodoItemListArray)
+    private func saveItems(items: [Item]) {
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(items)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Error encoding item array!, \(error)")
+        }
+        tableView.reloadData()
     }
 }
 
@@ -95,7 +102,7 @@ extension TodoListViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
         itemsArray[indexPath.row].done = !itemsArray[indexPath.row].done
-        tableView.reloadData()
+        saveItems(items: itemsArray)
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
