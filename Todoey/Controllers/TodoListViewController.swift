@@ -21,8 +21,8 @@ class TodoListViewController: UITableViewController {
     // MARK: - ViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-//        restoreItemsArray()
-        produceDefaultItems()
+        restoreItemsArray()
+//        produceDefaultItems()
     }
 
     // MARK: - Private:
@@ -36,8 +36,8 @@ class TodoListViewController: UITableViewController {
     }
     
     private func restoreItemsArray() {
-        if let items = defaults.array(forKey: kTodoItemListArray) as? [String] {
-//            itemsArray = items
+        if let items = defaults.array(forKey: kTodoItemListArray) as? [Item] {
+            itemsArray = items
         }
     }
     
@@ -56,7 +56,7 @@ class TodoListViewController: UITableViewController {
             }
             let newItem = Item(title: text)
             strongSelf.itemsArray.append(newItem)
-//            strongSelf.saveItem(items: strongSelf.itemsArray)
+            strongSelf.saveItem(items: strongSelf.itemsArray)
             strongSelf.tableView.reloadData()
         }
         alert.addTextField { alertTextFieled in
@@ -67,7 +67,7 @@ class TodoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    private func saveItem(items: [String]) {
+    private func saveItem(items: [Item]) {
         defaults.set(items, forKey: kTodoItemListArray)
     }
 }
