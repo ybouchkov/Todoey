@@ -22,23 +22,18 @@ class TodoListViewController: UITableViewController {
     // MARK: - ViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-//        restoreItemsArray()
-//        produceDefaultItems() // test case 
+        restoreItemsArray() 
     }
 
     // MARK: - Private:
-    private func produceDefaultItems() {
-        itemsArray = [
-            Item(title: "Find Mike"),
-            Item(title: "Have a nice week!"),
-            Item(title: "Junk"),
-            Item(title: "Food")
-        ]
-    }
-    
     private func restoreItemsArray() {
-        if let items = defaults.array(forKey: kTodoItemListArray) as? [Item] {
-            itemsArray = items
+        if let dataFilePath = dataFilePath, let data = try? Data(contentsOf: dataFilePath) {
+            let decoder = PropertyListDecoder()
+            do {
+                itemsArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("Error in decoding data: \(error)")
+            }
         }
     }
     
@@ -71,7 +66,9 @@ class TodoListViewController: UITableViewController {
         let encoder = PropertyListEncoder()
         do {
             let data = try encoder.encode(items)
-            try data.write(to: dataFilePath!)
+            if let dataFilePath = dataFilePath {
+                try data.write(to: dataFilePath)
+            }
         } catch {
             print("Error encoding item array!, \(error)")
         }
