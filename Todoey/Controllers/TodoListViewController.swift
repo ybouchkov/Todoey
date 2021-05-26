@@ -7,12 +7,14 @@
 //
 
 import UIKit
+import CoreData
 
 class TodoListViewController: UITableViewController {
     // MARK: - IBOutlets & Properties
     private var itemsArray = [Item]()
     private let reuseIdentifier = "ToDoItemCell"
     private let rowHeight: CGFloat = 50.0
+    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     // MARK: - User Defaults
     private let defaults = UserDefaults.standard
@@ -22,20 +24,20 @@ class TodoListViewController: UITableViewController {
     // MARK: - ViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        restoreItemsArray() 
+//        restoreItemsArray()
     }
 
     // MARK: - Private:
-    private func restoreItemsArray() {
-        if let dataFilePath = dataFilePath, let data = try? Data(contentsOf: dataFilePath) {
-            let decoder = PropertyListDecoder()
-            do {
-                itemsArray = try decoder.decode([Item].self, from: data)
-            } catch {
-                print("Error in decoding data: \(error)")
-            }
-        }
-    }
+//    private func restoreItemsArray() {
+//        if let dataFilePath = dataFilePath, let data = try? Data(contentsOf: dataFilePath) {
+//            let decoder = PropertyListDecoder()
+//            do {
+//                itemsArray = try decoder.decode([Item].self, from: data)
+//            } catch {
+//                print("Error in decoding data: \(error)")
+//            }
+//        }
+//    }
     
     // MARK: - Private: IBActions
     @IBAction
@@ -50,9 +52,11 @@ class TodoListViewController: UITableViewController {
                 print("No item added!")
                 return
             }
-            let newItem = Item(title: text)
+            let newItem = Item(context: strongSelf.context)
+            newItem.title = text
+            newItem.done = false
             strongSelf.itemsArray.append(newItem)
-            strongSelf.saveItems(items: strongSelf.itemsArray)
+            strongSelf.saveItem()
         }
         alert.addTextField { alertTextFieled in
             alertTextFieled.placeholder = "Create new item"
@@ -62,15 +66,11 @@ class TodoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    private func saveItems(items: [Item]) {
-        let encoder = PropertyListEncoder()
+    private func saveItem() {
         do {
-            let data = try encoder.encode(items)
-            if let dataFilePath = dataFilePath {
-                try data.write(to: dataFilePath)
-            }
+            try context.save()
         } catch {
-            print("Error encoding item array!, \(error)")
+            print("Error saving context: \(error)")
         }
         tableView.reloadData()
     }
@@ -99,7 +99,7 @@ extension TodoListViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
         itemsArray[indexPath.row].done = !itemsArray[indexPath.row].done
-        saveItems(items: itemsArray)
+        saveItem()
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
