@@ -24,20 +24,19 @@ class TodoListViewController: UITableViewController {
     // MARK: - ViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-//        restoreItemsArray()
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+        restoreItemsArray()
     }
 
     // MARK: - Private:
-//    private func restoreItemsArray() {
-//        if let dataFilePath = dataFilePath, let data = try? Data(contentsOf: dataFilePath) {
-//            let decoder = PropertyListDecoder()
-//            do {
-//                itemsArray = try decoder.decode([Item].self, from: data)
-//            } catch {
-//                print("Error in decoding data: \(error)")
-//            }
-//        }
-//    }
+    private func restoreItemsArray() {
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        do {
+            itemsArray = try context.fetch(request)
+        } catch {
+            print("Error fetching data from contex: \(context)")
+        }
+    }
     
     // MARK: - Private: IBActions
     @IBAction
