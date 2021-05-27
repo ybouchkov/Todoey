@@ -18,6 +18,12 @@ class TodoListViewController: UITableViewController {
     private let rowHeight: CGFloat = 55.0
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
+    var selectedCategory: Category? {
+        didSet {
+            restoreItemsArray()
+        }
+    }
+    
     // MARK: - User Defaults
     private let defaults = UserDefaults.standard
     private let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
@@ -32,11 +38,19 @@ class TodoListViewController: UITableViewController {
     }
 
     // MARK: - Private:
-    private func restoreItemsArray(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
-        do {
-            itemsArray = try context.fetch(request)
-        } catch {
-            print("Error fetching data from contex: \(context)")
+    private func restoreItemsArray(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
+        if let selectedCategory = selectedCategory, let selectedCategoryName = selectedCategory.name {
+            let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategoryName)
+            if let addiotionalPredicate = predicate {
+                request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, addiotionalPredicate])
+            } else {
+                request.predicate = categoryPredicate
+            }
+            do {
+                itemsArray = try context.fetch(request)
+            } catch {
+                print("Error fetching data from contex: \(context)")
+            }
         }
         tableView.reloadData()
     }
@@ -44,6 +58,24 @@ class TodoListViewController: UITableViewController {
     private func makingInitialFetchRequest() {
         let request: NSFetchRequest<Item> = Item.fetchRequest()
         restoreItemsArray(with: request)
+    }
+    
+    private func createAndSaveItem(with title: String, done: Bool) {
+        let newItem = Item(context: context)
+        newItem.title = title
+        newItem.done = done
+        newItem.parentCategory = selectedCategory
+        itemsArray.append(newItem)
+        saveItems()
+    }
+    
+    private func saveItems() {
+        do {
+            try context.save()
+        } catch {
+            print("Error saving context: \(error)")
+        }
+        tableView.reloadData()
     }
     
     // MARK: - Private: IBActions
@@ -59,11 +91,7 @@ class TodoListViewController: UITableViewController {
                 print("No item added!")
                 return
             }
-            let newItem = Item(context: strongSelf.context)
-            newItem.title = text
-            newItem.done = false
-            strongSelf.itemsArray.append(newItem)
-            strongSelf.saveItems()
+            strongSelf.createAndSaveItem(with: text, done: false)
         }
         alert.addTextField { alertTextFieled in
             alertTextFieled.placeholder = "Create new item"
@@ -71,15 +99,6 @@ class TodoListViewController: UITableViewController {
         }
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
-    }
-    
-    private func saveItems() {
-        do {
-            try context.save()
-        } catch {
-            print("Error saving context: \(error)")
-        }
-        tableView.reloadData()
     }
 }
 
@@ -118,10 +137,10 @@ extension TodoListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         let request: NSFetchRequest<Item> = Item.fetchRequest()
         if let text = searchBar.text, text.count > 0 {
-            request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", text)
+            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", text)
             // sorting
             request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-            restoreItemsArray(with: request)
+            restoreItemsArray(with: request, predicate: predicate)
         } else {
             restoreItemsArray()
             DispatchQueue.main.async {

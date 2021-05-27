@@ -15,6 +15,7 @@ class CategoryTableViewController: UITableViewController {
     
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     private let kCategoryCellReuseIdentifier = "CategoryCell"
+    private let kSegueIdentifier = "goToItems"
     
     // MARK: - CategoryTableViewController Lifecycle
     override func viewDidLoad() {
@@ -66,6 +67,14 @@ class CategoryTableViewController: UITableViewController {
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
     }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let destinationVC = segue.destination as? TodoListViewController {
+            if let indexPath = tableView.indexPathForSelectedRow {
+                destinationVC.selectedCategory = categories[indexPath.row]
+            }
+        }
+    }
 }
 
 // MARK: - UITableViewDataSource & Delegates
@@ -81,6 +90,6 @@ extension CategoryTableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
+        performSegue(withIdentifier: kSegueIdentifier, sender: self)
     }
 }
