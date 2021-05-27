@@ -15,7 +15,7 @@ class TodoListViewController: UITableViewController {
     
     private var itemsArray = [Item]()
     private let reuseIdentifier = "ToDoItemCell"
-    private let rowHeight: CGFloat = 50.0
+    private let rowHeight: CGFloat = 55.0
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     // MARK: - User Defaults
@@ -115,15 +115,18 @@ extension TodoListViewController {
 
 // MARK: - UISearchBarDelegate States Methods
 extension TodoListViewController: UISearchBarDelegate {
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         let request: NSFetchRequest<Item> = Item.fetchRequest()
-        if let text = searchBar.text {
+        if let text = searchBar.text, text.count > 0 {
             request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", text)
             // sorting
             request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
             restoreItemsArray(with: request)
         } else {
-            print("Enter some text, please!")
+            restoreItemsArray()
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
         }
     }
 }
