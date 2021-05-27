@@ -55,7 +55,7 @@ class TodoListViewController: UITableViewController {
             newItem.title = text
             newItem.done = false
             strongSelf.itemsArray.append(newItem)
-            strongSelf.saveItem()
+            strongSelf.saveItems()
         }
         alert.addTextField { alertTextFieled in
             alertTextFieled.placeholder = "Create new item"
@@ -65,7 +65,7 @@ class TodoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    private func saveItem() {
+    private func saveItems() {
         do {
             try context.save()
         } catch {
@@ -97,8 +97,10 @@ extension TodoListViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
+//        context.delete(itemsArray[indexPath.row])
+//        itemsArray.remove(at: indexPath.row)
         itemsArray[indexPath.row].done = !itemsArray[indexPath.row].done
-        saveItem()
+        saveItems()
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
