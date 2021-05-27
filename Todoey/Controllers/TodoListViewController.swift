@@ -11,6 +11,8 @@ import CoreData
 
 class TodoListViewController: UITableViewController {
     // MARK: - IBOutlets & Properties
+    @IBOutlet private weak var searchBar: UISearchBar!
+    
     private var itemsArray = [Item]()
     private let reuseIdentifier = "ToDoItemCell"
     private let rowHeight: CGFloat = 50.0
@@ -24,18 +26,24 @@ class TodoListViewController: UITableViewController {
     // MARK: - ViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        searchBar.delegate = self
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         restoreItemsArray()
     }
 
     // MARK: - Private:
-    private func restoreItemsArray() {
-        let request: NSFetchRequest<Item> = Item.fetchRequest()
+    private func restoreItemsArray(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
         do {
             itemsArray = try context.fetch(request)
         } catch {
             print("Error fetching data from contex: \(context)")
         }
+        tableView.reloadData()
+    }
+    
+    private func makingInitialFetchRequest() {
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        restoreItemsArray(with: request)
     }
     
     // MARK: - Private: IBActions
@@ -102,5 +110,20 @@ extension TodoListViewController {
         itemsArray[indexPath.row].done = !itemsArray[indexPath.row].done
         saveItems()
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+}
+
+// MARK: - UISearchBarDelegate States Methods
+extension TodoListViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        if let text = searchBar.text {
+            request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", text)
+            // sorting
+            request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+            restoreItemsArray(with: request)
+        } else {
+            print("Enter some text, please!")
+        }
     }
 }
