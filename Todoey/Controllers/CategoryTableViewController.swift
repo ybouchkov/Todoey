@@ -42,6 +42,13 @@ class CategoryTableViewController: UITableViewController {
         tableView.reloadData()
     }
     
+    private func saveCategory(with name: String) {
+        let newCategory = Category(context: context)
+        newCategory.name = name
+        categories.append(newCategory)
+        saveCategories()
+    }
+    
     // MARK: - IBActions: Private
     @IBAction
     private func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -55,10 +62,7 @@ class CategoryTableViewController: UITableViewController {
                 print("No category added!")
                 return
             }
-            let newCategory = Category(context: strongSelf.context)
-            newCategory.name = text
-            strongSelf.categories.append(newCategory)
-            strongSelf.saveCategories()
+            strongSelf.saveCategory(with: text)
         }
         alert.addTextField { alertTextFieled in
             alertTextFieled.placeholder = "Create new Category"
