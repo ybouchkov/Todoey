@@ -17,9 +17,6 @@ class CategoryTableViewController: UITableViewController {
     // MARK: - Realm
     private let realm = try! Realm()
     
-    // MARK: - CoreData
-    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
     private let kCategoryCellReuseIdentifier = "CategoryCell"
     private let kSegueIdentifier = "goToItems"
     

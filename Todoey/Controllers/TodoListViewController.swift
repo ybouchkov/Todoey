@@ -19,7 +19,6 @@ class TodoListViewController: UITableViewController {
     private var todoItems: Results<Item>?
     private let reuseIdentifier = "ToDoItemCell"
     private let rowHeight: CGFloat = 55.0
-    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     var selectedCategory: Category? {
         didSet {
@@ -27,9 +26,6 @@ class TodoListViewController: UITableViewController {
         }
     }
     
-    // MARK: - User Defaults
-    private let defaults = UserDefaults.standard
-    private let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     private let kTodoItemListArray = "TodoItemListArray_v1"
     
     // MARK: - ViewController Lifecycle
