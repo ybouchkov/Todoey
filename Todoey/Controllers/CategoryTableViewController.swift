@@ -8,12 +8,18 @@
 
 import UIKit
 import CoreData
+import RealmSwift
 
 class CategoryTableViewController: UITableViewController {
     // MARK: - IBOutlets & Properties
     private var categories = [Category]()
     
+    // MARK: - Realm
+    private let realm = try! Realm()
+    
+    // MARK: - CoreData
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
     private let kCategoryCellReuseIdentifier = "CategoryCell"
     private let kSegueIdentifier = "goToItems"
     
@@ -21,33 +27,35 @@ class CategoryTableViewController: UITableViewController {
     // MARK: - CategoryTableViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        restoreCategories()
+//        restoreCategories()
     }
     
     // MARK: - Private
-    private func saveCategories() {
+    private func save(category: Category) {
         do {
-            try context.save()
+            try realm.write({
+                realm.add(category)
+            })
         } catch {
             print("Error in saving Category: \(error)")
         }
         tableView.reloadData()
     }
     
-    private func restoreCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
-        do {
-            categories = try context.fetch(request)
-        } catch {
-            print("Error fetching Categories from CoreData: \(error)")
-        }
-        tableView.reloadData()
-    }
+//    private func restoreCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
+//        do {
+//            categories = try context.fetch(request)
+//        } catch {
+//            print("Error fetching Categories from CoreData: \(error)")
+//        }
+//        tableView.reloadData()
+//    }
     
     private func saveCategory(with name: String) {
-        let newCategory = Category(context: context)
+        let newCategory = Category()
         newCategory.name = name
         categories.append(newCategory)
-        saveCategories()
+        save(category: newCategory)
     }
     
     // MARK: - IBActions: Private
