@@ -18,6 +18,7 @@ class SwipeTableViewController: UITableViewController, SwipeTableViewCellDelegat
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.tableFooterView = UIView() // for empty
+        tableView.separatorStyle = .none
     }
     
     // MARK: - Public: Methods for overriding

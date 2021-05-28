@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class CategoryTableViewController: SwipeTableViewController {
     // MARK: - IBOutlets & Properties
@@ -115,6 +116,7 @@ extension CategoryTableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
+        cell.backgroundColor = UIColor.randomFlat()
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories found yet"
         return cell
     }
