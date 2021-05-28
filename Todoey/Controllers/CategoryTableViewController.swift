@@ -17,6 +17,7 @@ class CategoryTableViewController: UITableViewController {
     private let kCategoryCellReuseIdentifier = "CategoryCell"
     private let kSegueIdentifier = "goToItems"
     
+    private let rowHeight: CGFloat = 55.0
     // MARK: - CategoryTableViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -95,5 +96,9 @@ extension CategoryTableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: kSegueIdentifier, sender: self)
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        rowHeight
     }
 }
