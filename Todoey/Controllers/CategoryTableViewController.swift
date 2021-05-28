@@ -12,7 +12,7 @@ import RealmSwift
 
 class CategoryTableViewController: UITableViewController {
     // MARK: - IBOutlets & Properties
-    private var categories = [Category]()
+    private var categories: Results<Category>?
     
     // MARK: - Realm
     private let realm = try! Realm()
@@ -27,7 +27,7 @@ class CategoryTableViewController: UITableViewController {
     // MARK: - CategoryTableViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-//        restoreCategories()
+        restoreCategories()
     }
     
     // MARK: - Private
@@ -42,19 +42,14 @@ class CategoryTableViewController: UITableViewController {
         tableView.reloadData()
     }
     
-//    private func restoreCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
-//        do {
-//            categories = try context.fetch(request)
-//        } catch {
-//            print("Error fetching Categories from CoreData: \(error)")
-//        }
-//        tableView.reloadData()
-//    }
+    private func restoreCategories() {
+        categories = realm.objects(Category.self)
+        tableView.reloadData()
+    }
     
     private func saveCategory(with name: String) {
         let newCategory = Category()
         newCategory.name = name
-        categories.append(newCategory)
         save(category: newCategory)
     }
     
@@ -84,7 +79,9 @@ class CategoryTableViewController: UITableViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destinationVC = segue.destination as? TodoListViewController {
             if let indexPath = tableView.indexPathForSelectedRow {
-                destinationVC.selectedCategory = categories[indexPath.row]
+                if let categories = categories {
+                    destinationVC.selectedCategory = categories[indexPath.row]
+                }
             }
         }
     }
@@ -93,12 +90,12 @@ class CategoryTableViewController: UITableViewController {
 // MARK: - UITableViewDataSource & Delegates
 extension CategoryTableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        categories.count
+        return categories?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: kCategoryCellReuseIdentifier, for: indexPath)
-        cell.textLabel?.text = categories[indexPath.row].name
+        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories found yet"
         return cell
     }
     
