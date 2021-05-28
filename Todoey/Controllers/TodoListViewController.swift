@@ -49,6 +49,7 @@ class TodoListViewController: UITableViewController {
                     let newItem = Item()
                     newItem.title = title
                     newItem.done = done
+                    newItem.dateCreated = Date()
                     currentCategory.items.append(newItem)
                 }
             } catch {
@@ -132,17 +133,14 @@ extension TodoListViewController {
 // MARK: - UISearchBarDelegate States Methods
 extension TodoListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        let request: NSFetchRequest<Item> = Item.fetchRequest()
-//        if let text = searchBar.text, text.count > 0 {
-//            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", text)
-//            // sorting
-//            request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-//            restoreItemsArray(with: request, predicate: predicate)
-//        } else {
-//            restoreItemsArray()
-//            DispatchQueue.main.async {
-//                searchBar.resignFirstResponder()
-//            }
-//        }
+        if let text = searchBar.text, !text.isEmpty {
+            todoItems = todoItems?.filter("title CONTAINS %@", text).sorted(byKeyPath: "dateCreated", ascending: true)
+        } else {
+            restoreItemsArray()
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+        }
+        tableView.reloadData()
     }
 }
