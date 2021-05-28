@@ -8,9 +8,8 @@
 
 import UIKit
 import RealmSwift
-import SwipeCellKit
 
-class CategoryTableViewController: UITableViewController {
+class CategoryTableViewController: SwipeTableViewController {
     // MARK: - IBOutlets & Properties
     private var categories: Results<Category>?
     
@@ -20,7 +19,6 @@ class CategoryTableViewController: UITableViewController {
     private let kCategoryCellReuseIdentifier = "CategoryCell"
     private let kSegueIdentifier = "goToItems"
     
-    private let rowHeight: CGFloat = 80.0
     // MARK: - CategoryTableViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,6 +46,20 @@ class CategoryTableViewController: UITableViewController {
         let newCategory = Category()
         newCategory.name = name
         save(category: newCategory)
+    }
+    
+    // MARK: - Delete method from Swipe
+    override func updateModel(at indexPath: IndexPath) {
+        super.updateModel(at: indexPath)
+        if let categoryToDelete = categories?[indexPath.row] {
+            do {
+                try realm.write {
+                    realm.delete(categoryToDelete)
+                }
+            } catch {
+                print("Error in deleting category: \(error)")
+            }
+        }
     }
     
     private func deleteCategory(_ category: Category) {
@@ -102,47 +114,13 @@ extension CategoryTableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCell(withIdentifier: kCategoryCellReuseIdentifier, for: indexPath) as? SwipeTableViewCell {
-            cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories found yet"
-            cell.delegate = self
-            return cell
-        }
-        return UITableViewCell()
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
+        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories found yet"
+        return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: kSegueIdentifier, sender: self)
-    }
-    
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        rowHeight
-    }
+    }    
 }
 
-// MARK: - SwipeCellKit Implementaion
-extension CategoryTableViewController: SwipeTableViewCellDelegate {
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
-        guard orientation == .right else { return nil }
-
-        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { [weak self] action, indexPath in
-            guard let strongSelf = self else {
-                return
-            }
-            // handle action by updating model with deletion
-            if let category = strongSelf.categories?[indexPath.row] {
-                strongSelf.deleteCategory(category)
-            }
-        }
-
-        // customize the action appearance
-        deleteAction.image = UIImage(named: "delete-icon")
-
-        return [deleteAction]
-    }
-    
-    func tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
-        var options = SwipeOptions()
-        options.expansionStyle = .destructive
-        return options
-    }
-}

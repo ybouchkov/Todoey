@@ -9,15 +9,14 @@
 import UIKit
 import RealmSwift
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
     // MARK: - IBOutlets & Properties
     @IBOutlet private weak var searchBar: UISearchBar!
     
     private let realm = try! Realm()
     
     private var todoItems: Results<Item>?
-    private let reuseIdentifier = "ToDoItemCell"
-    private let rowHeight: CGFloat = 55.0
+    private let reuseIdentifier = "Cell"
     
     var selectedCategory: Category? {
         didSet {
@@ -68,6 +67,20 @@ class TodoListViewController: UITableViewController {
         }
         tableView.reloadData()
     }
+    
+    // MARK: - Delete method from Swipe
+    override func updateModel(at indexPath: IndexPath) {
+        super.updateModel(at: indexPath)
+        if let itemToDelete = todoItems?[indexPath.row] {
+            do {
+                try realm.write {
+                    realm.delete(itemToDelete)
+                }
+            } catch {
+                print("Error in deleting item: \(error)")
+            }
+        }
+    }
 
     // MARK: - Private: IBActions
     @IBAction
@@ -100,8 +113,8 @@ extension TodoListViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath)
-        
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
+
         if let item = todoItems?[indexPath.row] {
             cell.textLabel?.text = item.title
             cell.accessoryType = item.done ? .checkmark : .none
@@ -109,10 +122,6 @@ extension TodoListViewController {
             cell.textLabel?.text = "No Items Added"
         }
         return cell
-    }
-    
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        rowHeight
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
