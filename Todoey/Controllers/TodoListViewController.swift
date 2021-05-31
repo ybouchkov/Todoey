@@ -34,8 +34,27 @@ class TodoListViewController: SwipeTableViewController {
         searchBar.delegate = self
         restoreItemsArray()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        setupNavigationController()
+    }
 
     // MARK: - Private:
+    private func setupNavigationController() {
+        if let colorHex = selectedCategory?.hexColor, let bigTitleName = selectedCategory?.name {
+            title = bigTitleName
+            guard let navBar = navigationController?.navigationBar else { return }
+            if let navBarColor = UIColor(hexString: colorHex) {
+                navBar.backgroundColor = navBarColor
+                navBar.tintColor = navBarColor
+                navBar.tintColor = ContrastColorOf(navBarColor, returnFlat: true)
+                navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: ContrastColorOf(navBarColor, returnFlat: true)]
+                searchBar.barTintColor = navBarColor
+            }
+        }
+    }
+    
     private func restoreItemsArray() {
         todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
         tableView.reloadData()

@@ -26,7 +26,17 @@ class CategoryTableViewController: SwipeTableViewController {
         restoreCategories()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        setupNavigation()
+    }
+    
     // MARK: - Private
+    private func setupNavigation() {
+        guard let navBar = navigationController?.navigationBar else { return }
+        navBar.backgroundColor = UIColor(hexString: "1D9BF6")
+    }
+    
     private func save(category: Category) {
         do {
             try realm.write({
@@ -119,6 +129,9 @@ extension CategoryTableViewController {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         cell.backgroundColor = UIColor(hexString: categories?[indexPath.row].hexColor ?? UIColor.white.hexValue())
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories found yet"
+        if let category = categories?[indexPath.row], let categoryCellColor = UIColor(hexString: category.hexColor) {
+            cell.textLabel?.textColor = ContrastColorOf(categoryCellColor, returnFlat: true)
+        }
         return cell
     }
     
